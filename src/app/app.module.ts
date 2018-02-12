@@ -2,8 +2,14 @@ import {
   BrowserModule
 } from '@angular/platform-browser';
 import {
-  NgModule
+  NgModule,
+  Component
 } from '@angular/core';
+
+import {
+  RouterModule,
+  Routes
+} from '@angular/router';
 
 import {
   FormsModule
@@ -37,10 +43,37 @@ import {
   environment
 } from '../environments/environment';
 
+import {
+  LoginPageComponent
+} from '../pages/login/login';
+import {
+  MainMenuPageComponent
+} from '../pages/mainMenu/mainMenu';
+import {
+  SlidePageComponent
+} from '../pages/slide/slide';
+
+const appRoutes: Routes = [{
+  path: 'login',
+  component: LoginPageComponent
+}, {
+  path: 'mainMenu',
+  component: MainMenuPageComponent
+}, {
+  path: 'slide',
+  component: SlidePageComponent
+}, {
+  path: '',
+  redirectTo: '/login',
+  pathMatch: 'full'
+}, ];
 
 @NgModule({
   declarations: [
     AppComponent,
+    LoginPageComponent,
+    MainMenuPageComponent,
+    SlidePageComponent
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -53,7 +86,12 @@ import {
     MatCardModule,
     MatInputModule,
     MatToolbarModule,
-    MatIconModule
+    MatIconModule,
+    RouterModule.forRoot(
+      appRoutes, {
+        enableTracing: true
+      }
+    )
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,1 +1,48 @@
 /* You can add global styles to this file, and also import other style files */
+@import "https://fonts.googleapis.com/icon?family=Material+Icons";
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+#main-header {
+  height: 8vh;
+  max-height: 12vmin;
+}
+
+#header-title {
+    font-size: 5vw;
+}
+
+.example-fill-remaining-space {
+  /* This fills the remaining space, by using flexbox. 
+         Every toolbar row uses a flexbox row layout. */
+  flex: 1 1 auto;
+}
+
+.margin {
+  height: 2vh;
+}
+
+.window {
+  position: relative;
+}
+
+#content {
+  background-color: #555555
+}
+
+.slide-card {
+  position: absolute;
+  width: 72vw;
+  height: 40.5vw;
+  margin: auto;
+}
+
+.slide-title {
+  font-size: 5vw;
+}
+
+.contents-text {
+    font-size: 3vw
+}
+
+.buttons {
+    margin-left: 50vw;
+}

@@ -2,6 +2,10 @@ import {
   Component,
 } from '@angular/core';
 
+import {
+  Router
+} from '@angular/router';
+
 @Component({
   selector: 'app-login-page',
   templateUrl: './login.html',
@@ -9,8 +13,11 @@ import {
 })
 export class LoginPageComponent {
 
-  constructor() {
+  constructor(private router: Router) {
 
   }
 
+  onLogin(userKind: string) {
+    this.router.navigate(['mainMenu', userKind]);
+  }
 }

@@ -1,0 +1,16 @@
+#login-title {
+    color: #FFFFFF
+}
+
+#login-container {
+    position: relative;
+}
+
+#login-card {
+    width: 85vw;
+    max-width: 480px;
+    height: 70vh;
+    max-height: 720px;
+    margin: auto;
+}
+

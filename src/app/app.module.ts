@@ -19,6 +19,8 @@ import {
   MatCardModule,
   MatButtonModule,
   MatInputModule,
+  MatListModule,
+  MatTabsModule,
   MatToolbarModule,
   MatIconModule
 } from '@angular/material';
@@ -57,7 +59,7 @@ const appRoutes: Routes = [{
   path: 'login',
   component: LoginPageComponent
 }, {
-  path: 'mainMenu',
+  path: 'mainMenu/:userKind',
   component: MainMenuPageComponent
 }, {
   path: 'slide',
@@ -85,6 +87,8 @@ const appRoutes: Routes = [{
     MatButtonModule,
     MatCardModule,
     MatInputModule,
+    MatListModule,
+    MatTabsModule,
     MatToolbarModule,
     MatIconModule,
     RouterModule.forRoot(

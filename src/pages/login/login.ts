@@ -13,11 +13,14 @@ import {
 })
 export class LoginPageComponent {
 
+  userName: string;
+
   constructor(private router: Router) {
 
   }
 
   onLogin(userKind: string) {
+    console.log(this.userName);
     this.router.navigate(['mainMenu', userKind]);
   }
 }

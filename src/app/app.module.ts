@@ -16,13 +16,16 @@ import {
 } from '@angular/forms';
 
 import {
-  MatCardModule,
   MatButtonModule,
+  MatCardModule,
+  MatDialogModule,
   MatInputModule,
   MatListModule,
+  MatSnackBarModule,
   MatTabsModule,
   MatToolbarModule,
-  MatIconModule
+  MatIconModule,
+  MatProgressSpinnerModule
 } from '@angular/material';
 import {
   BrowserAnimationsModule
@@ -54,6 +57,9 @@ import {
 import {
   SlidePageComponent
 } from '../pages/slide/slide';
+import {
+  UploadDialogComponent
+} from '../components/dialog/uploadDialog/uploadDialog';
 
 const appRoutes: Routes = [{
   path: 'login',
@@ -75,8 +81,10 @@ const appRoutes: Routes = [{
     AppComponent,
     LoginPageComponent,
     MainMenuPageComponent,
-    SlidePageComponent
+    SlidePageComponent,
+    UploadDialogComponent
   ],
+  entryComponents: [UploadDialogComponent],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
@@ -86,11 +94,14 @@ const appRoutes: Routes = [{
     FormsModule,
     MatButtonModule,
     MatCardModule,
+    MatDialogModule,
     MatInputModule,
     MatListModule,
+    MatSnackBarModule,
     MatTabsModule,
     MatToolbarModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     RouterModule.forRoot(
       appRoutes, {
         enableTracing: true

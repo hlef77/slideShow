@@ -1,5 +1,25 @@
 <h1>mainMenu Page</h1>
 
-<h2>{{userKind}}</h2>
+<mat-card id="login-card">
+  <mat-card-title>Welcome {{userKind}} {{userName}}!</mat-card-title>
 
-<button routerLink="/slide">START</button>
+  <mat-card-content>
+
+    <h1>Slide List</h1>
+    <button mat-raised-button color="primary" (click)="openUploadDialog()">upload</button>
+
+    <mat-progress-spinner *ngIf="loading" mode="indeterminate" value=50>
+    </mat-progress-spinner>
+
+    <mat-list *ngIf="!loading">
+
+      <mat-list-item>
+      </mat-list-item>
+
+      <button mat-raised-button color="primary" routerLink="/slide">START</button>
+
+    </mat-list>
+
+  </mat-card-content>
+
+</mat-card>

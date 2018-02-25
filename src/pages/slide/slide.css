@@ -1,0 +1,36 @@
+#main-header {
+  height: 8vh;
+  max-height: 12vmin;
+}
+
+#header-title {
+    font-size: 5vw;
+}
+
+.example-fill-remaining-space {
+  /* This fills the remaining space, by using flexbox. 
+         Every toolbar row uses a flexbox row layout. */
+  flex: 1 1 auto;
+}
+
+.window {
+  position: relative;
+}
+
+.slide-card {
+  width: 72vw;
+  height: 40.5vw;
+  margin: auto;
+}
+
+.slide-title {
+  font-size: 5vw;
+}
+
+.contents-text {
+    font-size: 3vw
+}
+
+.buttons {
+    margin-left: 50vw;
+}

@@ -5,20 +5,38 @@
 
   <mat-card-content>
 
-    <h1>Slide List</h1>
-    <button mat-raised-button color="primary" (click)="openUploadDialog()">upload</button>
+    <mat-tab-group>
 
-    <mat-progress-spinner *ngIf="loading" mode="indeterminate" value=50>
-    </mat-progress-spinner>
+      <mat-tab label="SHOW" *ngIf="userInfo.userId">
+        <h1>Slide List</h1>
+        <button mat-raised-button color="primary" (click)="openUploadDialog()">upload</button>
 
-    <mat-list *ngIf="!loading">
+        <mat-progress-spinner *ngIf="loading" mode="indeterminate" value=50>
+        </mat-progress-spinner>
 
-      <mat-list-item>
-      </mat-list-item>
+        <mat-list *ngIf="!loading">
 
-      <button mat-raised-button color="primary" routerLink="/slide">START</button>
+          <mat-list-item>
+          </mat-list-item>
 
-    </mat-list>
+          <button mat-raised-button color="primary" routerLink="/slide">START</button>
+
+        </mat-list>
+      </mat-tab>
+
+      <mat-tab label="WATCH">
+        <h1>Search Presenter</h1>
+        <mat-form-field>
+          <input matInput placeholder="ID" value="" [(ngModel)]="searchText">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="onSearch()">search</button>
+
+        <mat-list-item *ngFor="let slide of hitSlides">
+          ・ <button mat-button>{{slide}}</button>
+        </mat-list-item>
+
+      </mat-tab>
+    </mat-tab-group>
 
   </mat-card-content>
 

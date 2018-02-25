@@ -6,6 +6,10 @@ import {
   Router
 } from '@angular/router';
 
+import {
+  UserInfo
+} from '../../models/userInfo/userInfo';
+
 @Component({
   selector: 'app-login-page',
   templateUrl: './login.html',
@@ -13,14 +17,26 @@ import {
 })
 export class LoginPageComponent {
 
+  userId: string;
+  password: string;
   userName: string;
 
-  constructor(private router: Router) {
-
+  constructor(
+    private router: Router,
+    private userInfo: UserInfo
+  ) {
+    this.userId = '';
   }
 
   onLogin(userKind: string) {
-    console.log(this.userName);
+    if (userKind === 'HOST') {
+      this.userInfo.userId = this.userId;
+      // 本来はDBからIDで名前取ってくる
+      this.userInfo.userName = this.userId;
+    } else {
+      this.userInfo.userName = this.userName;
+      this.userInfo.userId = '';
+    }
     this.router.navigate(['mainMenu', userKind]);
   }
 }

@@ -57,9 +57,17 @@ import {
 import {
   SlidePageComponent
 } from '../pages/slide/slide';
+
+import {
+  AlertDialogComponent
+} from '../components/dialog/alertDialog/alertDialog';
 import {
   UploadDialogComponent
 } from '../components/dialog/uploadDialog/uploadDialog';
+
+import {
+  UserInfo
+} from '../models/userInfo/userInfo';
 
 const appRoutes: Routes = [{
   path: 'login',
@@ -82,9 +90,13 @@ const appRoutes: Routes = [{
     LoginPageComponent,
     MainMenuPageComponent,
     SlidePageComponent,
+    AlertDialogComponent,
     UploadDialogComponent
   ],
-  entryComponents: [UploadDialogComponent],
+  entryComponents: [
+    AlertDialogComponent,
+    UploadDialogComponent
+  ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
@@ -108,7 +120,9 @@ const appRoutes: Routes = [{
       }
     )
   ],
-  providers: [],
+  providers: [
+    UserInfo
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

@@ -8,10 +8,11 @@ import {
   MatSnackBar
 } from '@angular/material';
 
-import {
-  environment
-} from '../../../environments/environment';
 import * as firebase from 'firebase';
+
+import {
+  UserInfo
+} from '../../../models/userInfo/userInfo';
 
 @Component({
   selector: 'app-upload-dialog',
@@ -25,7 +26,8 @@ export class UploadDialogComponent {
   constructor(
     public dialogRef: MatDialogRef < UploadDialogComponent > ,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public snackBar: MatSnackBar
+    public snackBar: MatSnackBar,
+    private userInfo: UserInfo
   ) {}
 
   onCancel = (): void => {
@@ -34,7 +36,7 @@ export class UploadDialogComponent {
 
   onUpload = (): void => {
     // フォルダ名、ファイル名を指定して参照を作成する
-    const storageRef = firebase.storage().ref(`upload_files//${this.file.name}`);
+    const storageRef = firebase.storage().ref(`upload_files/${this.userInfo.userId}/${this.file.name}`);
 
     // putメソッドでファイルをアップロード
     // 結果はPromiseで取得可能

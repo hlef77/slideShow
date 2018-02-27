@@ -3,6 +3,7 @@
 }
 
 #login-title {
+    font-size: 7vw;
     color: #FFFFFF
 }
 
@@ -11,6 +12,7 @@
 }
 
 #login-card {
+    overflow: scroll;
     width: 85vw;
     max-width: 480px;
     height: 70vh;

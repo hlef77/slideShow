@@ -1,6 +1,6 @@
 <h1>mainMenu Page</h1>
 
-<mat-card id="login-card">
+<mat-card id="mainmenu-card">
   <mat-card-title>Welcome {{userKind}} {{userName}}!</mat-card-title>
 
   <mat-card-content>
@@ -27,12 +27,12 @@
       <mat-tab label="WATCH">
         <h1>Search Presenter</h1>
         <mat-form-field>
-          <input matInput placeholder="ID" value="" [(ngModel)]="searchText">
+          <input matInput placeholder="ID" value="" [(ngModel)]="searchBoxText">
         </mat-form-field>
         <button mat-raised-button color="primary" (click)="onSearch()">search</button>
 
         <mat-list-item *ngFor="let slide of hitSlides">
-          ・ <button mat-button>{{slide}}</button>
+          ・ <button mat-button (click)="onSlideName(slide)">{{slide}}</button>
         </mat-list-item>
 
       </mat-tab>

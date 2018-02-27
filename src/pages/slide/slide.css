@@ -1,10 +1,10 @@
 #main-header {
-  height: 8vh;
+  height: 10vh;
   max-height: 12vmin;
 }
 
 #header-title {
-    font-size: 5vw;
+    font-size: 5vmin;
 }
 
 .example-fill-remaining-space {
@@ -24,11 +24,11 @@
 }
 
 .slide-title {
-  font-size: 5vw;
+  font-size: 5vmin;
 }
 
 .contents-text {
-    font-size: 3vw
+    font-size: 3vmin
 }
 
 .buttons {

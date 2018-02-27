@@ -62,12 +62,18 @@ import {
   AlertDialogComponent
 } from '../components/dialog/alertDialog/alertDialog';
 import {
+  LoadingDialogComponent
+} from '../components/dialog/loadingDialog/loadingDialog';
+import {
   UploadDialogComponent
 } from '../components/dialog/uploadDialog/uploadDialog';
 
 import {
   UserInfo
 } from '../models/userInfo/userInfo';
+import {
+  DownloadSlide
+} from '../models/downloadSlide/downloadSlide';
 
 const appRoutes: Routes = [{
   path: 'login',
@@ -91,10 +97,12 @@ const appRoutes: Routes = [{
     MainMenuPageComponent,
     SlidePageComponent,
     AlertDialogComponent,
+    LoadingDialogComponent,
     UploadDialogComponent
   ],
   entryComponents: [
     AlertDialogComponent,
+    LoadingDialogComponent,
     UploadDialogComponent
   ],
   imports: [
@@ -121,6 +129,7 @@ const appRoutes: Routes = [{
     )
   ],
   providers: [
+    DownloadSlide,
     UserInfo
   ],
   bootstrap: [AppComponent]

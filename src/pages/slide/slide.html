@@ -1,6 +1,7 @@
 <mat-toolbar id="main-header">
-  <span id="header-title">Slide Show</span>
-
+  <button mat-icon-button>
+    <mat-icon (click)="backToMainMenu()">arrow_back</mat-icon>
+  </button>
   <!-- This fills the remaining space of the current row -->
   <span class="example-fill-remaining-space"></span>
 
@@ -17,7 +18,7 @@
 
 <mat-card class="slide-card" id="slide-display" (click)="next()">
   <mat-card-title class="slide-title">
-    <div id="title"></div>
+    <div id="title">{{currentTitle}}</div>
   </mat-card-title>
 
   <mat-card-content id="slide-contents">

@@ -14,22 +14,31 @@ import {
 } from '@angular/router';
 
 import {
-  MatDialog
+  MatDialog,
+  MatDialogRef
 } from '@angular/material';
 
 import 'rxjs/add/operator/switchMap';
+
+import * as firebase from 'firebase';
 
 import {
   AngularFireDatabase
 } from 'angularfire2/database';
 
 import {
-  UploadDialogComponent
-} from '../../components/dialog/uploadDialog/uploadDialog';
-import {
   AlertDialogComponent
 } from '../../components/dialog/alertDialog/alertDialog';
+import {
+  LoadingDialogComponent
+} from '../../components/dialog/loadingDialog/loadingDialog';
+import {
+  UploadDialogComponent
+} from '../../components/dialog/uploadDialog/uploadDialog';
 
+import {
+  DownloadSlide
+} from '../../models/downloadSlide/downloadSlide';
 import {
   UserInfo
 } from '../../models/userInfo/userInfo';
@@ -41,20 +50,34 @@ import {
 })
 export class MainMenuPageComponent implements OnInit {
 
+  // ログインユーザー名
   userName: string;
+  // ユーザ種別
   userKind: string;
+  // ロード中判定
   loading: boolean;
-  searchText: string;
+  // 検索窓入力文字
+  searchBoxText: string;
+  // 検索押下時文字列
+  searchingUserId: string;
+  // 検索中ユーザーのDB参照
+  searchUserSlideRef: firebase.database.Reference;
+  // 検索にヒットしたスライド名の配列
   hitSlides: Array<string>;
+  // ローディングの参照
+  loadingDialogRef: MatDialogRef<LoadingDialogComponent>;
+  // スライドデータ
+  slideData: Object;
 
   constructor(
     private db: AngularFireDatabase,
     private route: ActivatedRoute,
     private router: Router,
     private dialog: MatDialog,
-    private userInfo: UserInfo
-  ) {
-    this.searchText = 'example_user';
+    public downloadSlide: DownloadSlide,
+    public userInfo: UserInfo
+    ) {
+    this.searchBoxText = 'example_user';
   }
 
   ngOnInit() {
@@ -99,7 +122,6 @@ export class MainMenuPageComponent implements OnInit {
   }
 
   openUploadDialog = () => {
-
     const dialogRef = this.dialog.open(UploadDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -108,10 +130,60 @@ export class MainMenuPageComponent implements OnInit {
     });
   }
 
-  async onSearch() {
-    const searchUserSlideRef = this.db.database.ref(`/${this.searchText}/slides`);
-    await searchUserSlideRef.on('value', (snapshot) => {
+  onSearch() {
+    this.searchingUserId = this.searchBoxText;
+    this.searchUserSlideRef = this.db.database.ref(`/${this.searchingUserId}/slides`);
+    this.searchUserSlideRef.on('value', (snapshot) => {
       this.hitSlides = Object.keys(snapshot.val());
     });
+  }
+
+  onSlideName = (slideName: string) => {
+    this.loadingDialogRef = this.dialog.open(LoadingDialogComponent, {});
+    this.loadingDialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userInfo.currentSlide = {
+          name: slideName,
+          author: this.searchingUserId
+        };
+        this.router.navigate(['slide'], this.slideData);
+      }
+    });
+    let fileUrl: string;
+    const searchUserSlideUrlRef = this.db.database.ref(`/${this.searchingUserId}/slides/${slideName}/file`);
+    searchUserSlideUrlRef.once('value', (snapshot) => {
+      fileUrl = snapshot.val();
+    });
+    this.download(fileUrl);
+  }
+
+  download = (filePath) => {
+    if (filePath === null || filePath === undefined || filePath === '') {
+      throw Error('ふぁいるぱすが空です');
+    }
+    const filePathRef: firebase.storage.Reference = firebase.storage().ref(filePath);
+    filePathRef.getDownloadURL().then((url) => {
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = (event) => {
+        const blob = xhr.response;
+        this.readJsonFromBlob(blob);
+      };
+      xhr.open('GET', url);
+      xhr.send();
+
+    }).catch((err) => {
+      throw Error('だうんろーどえらー: ' + err);
+    });
+  }
+
+  readJsonFromBlob = (blob: Blob) => {
+    const reader = new FileReader();
+    reader.addEventListener('loadend', () => {
+      // reader.result contains the contents of blob
+      this.downloadSlide.slideData = JSON.parse(reader.result);
+      this.loadingDialogRef.close(true);
+    });
+    reader.readAsText(blob);
   }
 }

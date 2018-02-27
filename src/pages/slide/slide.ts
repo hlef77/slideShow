@@ -7,14 +7,36 @@ import {
 } from 'angularfire2/database';
 
 import {
-  SLIDE_CONTENTS
-} from '../../slideContents/slideContents';
+  Router,
+  ActivatedRoute,
+  ParamMap
+} from '@angular/router';
+
+import 'rxjs/add/operator/switchMap';
+
+import {
+  MatDialog
+} from '@angular/material';
+
 import {
   FirebaseApp
 } from 'angularfire2/firebase.app.module';
 import {
   async
 } from '@angular/core/testing';
+
+import {
+  AlertDialogComponent
+} from '../../components/dialog/alertDialog/alertDialog';
+
+import {
+  DownloadSlide,
+  SLIDECONTENTS,
+  SLIDEDATA
+} from '../../models/downloadSlide/downloadSlide';
+import {
+  UserInfo
+} from '../../models/userInfo/userInfo';
 
 @Component({
   selector: 'app-slide-page',
@@ -23,89 +45,69 @@ import {
 })
 export class SlidePageComponent implements OnInit {
 
-  title: string;
+  slideTitle: string;
+  slideContents: SLIDECONTENTS;
 
-  count = 0;
+  currentTitle: string;
+  currentContents;
 
-  titleRef;
-  contentsRef;
-  countRef;
+  displayItem = [];
 
-  host = false;
+  // currentPosition;
 
-  slideContents = SLIDE_CONTENTS;
-  currentPageItems = [];
+  positionRef: firebase.database.Reference;
 
-  constructor(db: AngularFireDatabase) {
-    this.titleRef = db.database.ref('/title');
-    this.countRef = db.database.ref('/count');
-    this.contentsRef = db.database.ref('/content');
-
-    this.titleRef.set('');
-    this.countRef.set(0);
-    this.contentsRef.set('');
-  }
+  constructor(
+    private db: AngularFireDatabase,
+    private dialog: MatDialog,
+    private router: Router,
+    private route: ActivatedRoute,
+    private slideData: DownloadSlide,
+    private userInfo: UserInfo
+  ) {}
 
   ngOnInit() {
-    this.titleRef.on('value', (snapshot) => {
-      document.getElementById('title').innerText = snapshot.val();
+    console.log('INIT!');
+    this.checkLogin();
+    this.route.paramMap
+      .subscribe((params: ParamMap) => {
+        this.slideTitle = this.slideData.slideData.slide_title;
+        this.slideContents = this.slideData.slideData.slide_contents;
+      });
+
+    // this.currentPosition = {
+    //   page: 0,
+    //   point: 0
+    // };
+
+    this.positionRef = this.db.database.ref(`/${this.userInfo.currentSlide.author}/slides/${this.userInfo.currentSlide.name}/position`);
+    this.positionRef.on('value', (snapshot) => {
+      const position = snapshot.val();
+      // console.log(this.currentPosition.point + ':' + position.point);
+      // if (this.currentPosition.page !== position.page) {
+        this.onChangePage();
+      // }
+      // if (this.currentPosition.point !== position.point) {
+        this.onChangePoint(position.point);
+      // }
     });
 
-    this.contentsRef.on('value', (snapshot) => {
-      if (snapshot.val() === '') {
-        this.clearContents();
-      }
-      if (snapshot.val()[this.count] !== null && snapshot.val()[this.count] !== undefined) {
-        document.getElementById('slide-contents').innerHTML += '<div class="contents-text">' + snapshot.val()[this.count] + '</div>';
-      }
-    });
+    this.loadSlidePage(0);
 
-    this.countRef.on('value', (snapshot) => {
-      this.count = snapshot.val();
-    });
-
-    this.titleRef.set('Hello!');
   }
 
-  next = async () => {
-    if (this.host === false) {
-      return;
-    }
-    if (this.currentPageItems.length === 0 && this.slideContents.length !== 0) {
-      await this.getNextSlide();
-    }
-    if (this.currentPageItems[0] !== null && this.currentPageItems[0] !== undefined) {
-      const addkinds = Object.keys(this.currentPageItems[0]);
-      addkinds.forEach(addkind => {
-        switch (addkind) {
-          case 'text':
-            this.contentsRef.update({
-              [this.count]: this.currentPageItems.shift().text
-            });
-            break;
-          default:
-            break;
+  checkLogin = () => {
+    if (this.userInfo.userName === null || this.userInfo.userName === undefined || this.userInfo.userName === '') {
+      const alertRef = this.dialog.open(AlertDialogComponent, {
+        data: {
+          alertKind: 'Error',
+          message: '再ログインしてください。'
         }
-        this.countRef.set(this.count + 1);
+      });
+      alertRef.afterClosed().subscribe(() => {
+        this.router.navigate(['login']);
       });
     }
-  }
-
-  async getNextSlide() {
-    await this.contentsRef.set('');
-    this.currentPageItems = this.slideContents.shift();
-  }
-
-  reset = () => {
-    if (this.host === true) {
-      this.contentsRef.set('');
-      this.slideContents = SLIDE_CONTENTS;
-    }
-  }
-
-  clearContents = async () => {
-    document.getElementById('slide-contents').innerHTML = '';
-    await this.countRef.set(0);
   }
 
   changeFullScreen = () => {
@@ -116,11 +118,50 @@ export class SlidePageComponent implements OnInit {
     }
   }
 
-  onLock = () => {
-    this.host = true;
+  backToMainMenu = () => {
+    this.router.navigate(['mainMenu', '']);
   }
 
-  onUnLock = () => {
-    this.host = false;
+  loadSlidePage = (page: number) => {
+    this.currentTitle = this.slideContents[page].title;
+    this.setSlideContent(page);
+  }
+
+  setSlideContent = (page: number) => {
+    let contentsHtml = '';
+    this.slideContents[page].contents.forEach((item, index) => {
+      if (Object.keys(item)[0] = 'text') {
+        contentsHtml += '<div id="slide-page-content-' + (index + 1) + '" style=display:none>' + item.text + '</div>';
+      }
+      this.displayItem[index] = false;
+    });
+    document.getElementById('slide-contents').innerHTML = contentsHtml;
+    console.log();
+  }
+
+  next = () => {
+    // this.currentPosition.point += 1;
+    let currentPoint;
+    this.positionRef.child('/point').once('value', (snapshot) => {
+      currentPoint = snapshot.val();
+    });
+    this.positionRef.child('/point').set(currentPoint + 1);
+  }
+
+  onChangePage = () => {
+
+  }
+
+  onChangePoint = (point) => {
+    if (point <= this.slideContents[0].contents.length) {
+      document.getElementById('slide-page-content-' + point).style.display = '';
+    }
+  }
+
+  reset = () => {
+    this.positionRef.set({
+      page: 0,
+      point: 0
+    });
   }
 }

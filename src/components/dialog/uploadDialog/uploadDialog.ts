@@ -8,6 +8,10 @@ import {
   MatSnackBar
 } from '@angular/material';
 
+import {
+  AngularFireDatabase
+} from 'angularfire2/database';
+
 import * as firebase from 'firebase';
 
 import {
@@ -23,7 +27,11 @@ export class UploadDialogComponent {
 
   file: File;
 
+  // 入力ファイル名
+  fileName: string;
+
   constructor(
+    private db: AngularFireDatabase,
     public dialogRef: MatDialogRef < UploadDialogComponent > ,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public snackBar: MatSnackBar,
@@ -36,14 +44,28 @@ export class UploadDialogComponent {
 
   onUpload = (): void => {
     // フォルダ名、ファイル名を指定して参照を作成する
-    const storageRef = firebase.storage().ref(`upload_files/${this.userInfo.userId}/${this.file.name}`);
+    const strageFilePath = `upload_files/${this.userInfo.userId}/${this.file.name}`;
+    const storageRef = firebase.storage().ref(strageFilePath);
 
     // putメソッドでファイルをアップロード
     // 結果はPromiseで取得可能
     storageRef.put(this.file).then(result => {
-        // ここではアップロー済みの画像を表示するため結果をメンバ変数に格納
+        const userRef = this.db.database.ref(`/${this.userInfo.userId}/slides/`);
+        userRef.set({
+          [this.fileName]: {
+            clients: '',
+            file: strageFilePath,
+            position: {
+              page: 0,
+              point: 0,
+            },
+            receive_data: ''
+          }
+        });
+
+        // 完了のスナックバー表示
         this.openSnackBar('Upload Complete!');
-        console.log(result);
+        // ダイアログを閉じる
         this.dialogRef.close(true);
       })
       .catch(err => console.log(err));

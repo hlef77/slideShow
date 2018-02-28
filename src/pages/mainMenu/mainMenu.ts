@@ -55,17 +55,17 @@ export class MainMenuPageComponent implements OnInit {
   // ユーザ種別
   userKind: string;
   // ロード中判定
-  loading: boolean;
+  hostListLoading: boolean;
+  searchSlideLoading: boolean;
   // 検索窓入力文字
   searchBoxText: string;
   // 検索押下時文字列
   searchingUserId: string;
-  // 検索中ユーザーのDB参照
-  searchUserSlideRef: firebase.database.Reference;
-  // 検索にヒットしたスライド名の配列
-  hitSlides: Array<string>;
+  // ヒットしたスライド名の配列
+  hitHostSlides: Array < string > ;
+  hitSearchSlides: Array < string > ;
   // ローディングの参照
-  loadingDialogRef: MatDialogRef<LoadingDialogComponent>;
+  loadingDialogRef: MatDialogRef < LoadingDialogComponent > ;
   // スライドデータ
   slideData: Object;
 
@@ -76,22 +76,25 @@ export class MainMenuPageComponent implements OnInit {
     private dialog: MatDialog,
     public downloadSlide: DownloadSlide,
     public userInfo: UserInfo
-    ) {
+  ) {
     this.searchBoxText = 'example_user';
   }
 
   ngOnInit() {
-    this.checkLogin();
-    this.loadList();
+    // ログイン画面から渡されたパラメータの取得
     this.route.paramMap
       .subscribe((params: ParamMap) => {
         this.userKind = params.get('userKind');
       });
+    // ログイン状態の確認
+    this.checkLogin();
+    // 画面にユーザー名を表示
     this.userName = this.userInfo.userName;
   }
 
   checkLogin = () => {
     if (this.userKind === 'HOST' && (this.userInfo.userId === null || this.userInfo.userId === undefined || this.userInfo.userId === '')) {
+      // ホストアカウントがIDを持っていない場合
       const alertRef = this.dialog.open(AlertDialogComponent, {
         data: {
           alertKind: 'Error',
@@ -102,6 +105,7 @@ export class MainMenuPageComponent implements OnInit {
         this.router.navigate(['login']);
       });
     } else if (this.userInfo.userName === null || this.userInfo.userName === undefined || this.userInfo.userName === '') {
+      // nameを持っていない場合
       const alertRef = this.dialog.open(AlertDialogComponent, {
         data: {
           alertKind: 'Error',
@@ -111,50 +115,109 @@ export class MainMenuPageComponent implements OnInit {
       alertRef.afterClosed().subscribe(() => {
         this.router.navigate(['login']);
       });
+    } else if (this.userKind === 'HOST') {
+      // 有効なホストアカウントの場合
+      // 自分のアップロード済みスライドリストの取得
+      this.loadHostList();
     }
   }
 
-  loadList = () => {
-    this.loading = true;
-    setTimeout(() => {
-      this.loading = false;
-    }, 2000);
+  loadHostList = () => {
+    // ぐるぐるの表示
+    this.hostListLoading = true;
+
+    // アップロード済みスライド情報の取得
+    const hostSlidesRef = this.db.database.ref(`/${this.userInfo.userId}/slides`);
+    hostSlidesRef.once('value', (slidesSnapshot) => {
+      if (slidesSnapshot.val() !== null && slidesSnapshot.val() !== undefined) {
+        // 一つでも存在する場合
+        // リストに表示
+        this.hitHostSlides = Object.keys(slidesSnapshot.val());
+        // ぐるぐるの非表示
+        this.hostListLoading = false;
+      } else {
+        // 存在しない場合
+        // ぐるぐるの非表示
+        this.hostListLoading = false;
+      }
+    });
   }
 
   openUploadDialog = () => {
     const dialogRef = this.dialog.open(UploadDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadList();
+        this.loadHostList();
       }
     });
   }
 
   onSearch() {
+    // リストの初期化
+    this.hitSearchSlides = [];
+    // ぐるぐるの表示
+    this.searchSlideLoading = true;
+
+    // 検索押下時のユーザーIDを格納
     this.searchingUserId = this.searchBoxText;
-    this.searchUserSlideRef = this.db.database.ref(`/${this.searchingUserId}/slides`);
-    this.searchUserSlideRef.on('value', (snapshot) => {
-      this.hitSlides = Object.keys(snapshot.val());
+
+    const rootRef = this.db.database.ref(`/`);
+    rootRef.once('value', (rootSnapshot) => {
+      // 検索対象が存在するか確認
+      if (rootSnapshot.hasChild(`${this.searchingUserId}`)) {
+        // 存在する場合
+        const searchUserSlideRef = this.db.database.ref(`/${this.searchingUserId}/slides`);
+        searchUserSlideRef.once('value', (slidesSnapshot) => {
+          this.hitSearchSlides = Object.keys(slidesSnapshot.val());
+          // ぐるぐるの非表示
+          this.searchSlideLoading = false;
+        });
+      } else {
+        // 存在しない場合
+        // ぐるぐるの非表示
+        this.searchSlideLoading = false;
+      }
     });
   }
 
-  onSlideName = (slideName: string) => {
+  onSlideName = (slideName: string, mode: string) => {
+    // ローディングの表示
     this.loadingDialogRef = this.dialog.open(LoadingDialogComponent, {});
+
+    // ローディングのclose()後の挙動
     this.loadingDialogRef.afterClosed().subscribe(result => {
+      // close(true)であれば
       if (result) {
+        // スライド画面に遷移
+        this.router.navigate(['slide', mode]);
+      }
+    });
+
+    let fileUrl: string;
+    if (mode === 'SHOW') {
+      // SHOWタブ内で押下された場合(ホストが自身のスライドを選択した場合)
+      const ownSlideUrlRef = this.db.database.ref(`/${this.userInfo.userId}/slides/${slideName}/file`);
+      ownSlideUrlRef.once('value', (snapshot) => {
+        this.download(snapshot.val());
+        // 現在のスライド情報を保持
+        this.userInfo.currentSlide = {
+          name: slideName,
+          author: this.userInfo.userId
+        };
+      });
+    } else {
+      // WATCHタブ内で押下された場合
+      const searchUserSlideUrlRef = this.db.database.ref(`/${this.searchingUserId}/slides/${slideName}/file`);
+      searchUserSlideUrlRef.once('value', (snapshot) => {
+        fileUrl = snapshot.val();
+        this.download(snapshot.val());
+        // 現在のスライド情報を保持
         this.userInfo.currentSlide = {
           name: slideName,
           author: this.searchingUserId
         };
-        this.router.navigate(['slide'], this.slideData);
-      }
-    });
-    let fileUrl: string;
-    const searchUserSlideUrlRef = this.db.database.ref(`/${this.searchingUserId}/slides/${slideName}/file`);
-    searchUserSlideUrlRef.once('value', (snapshot) => {
-      fileUrl = snapshot.val();
-    });
-    this.download(fileUrl);
+      });
+    }
   }
 
   download = (filePath) => {

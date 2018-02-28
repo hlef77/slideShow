@@ -11,16 +11,14 @@
         <h1>Slide List</h1>
         <button mat-raised-button color="primary" (click)="openUploadDialog()">upload</button>
 
-        <mat-progress-spinner *ngIf="loading" mode="indeterminate" value=50>
+        <mat-progress-spinner *ngIf="hostListLoading" mode="indeterminate" value=50>
         </mat-progress-spinner>
 
-        <mat-list *ngIf="!loading">
-
-          <mat-list-item>
+        <mat-list>
+          <mat-list-item *ngFor="let slide of hitHostSlides">
+            ・<button mat-button (click)="onSlideName(slide, 'SHOW')">{{slide}}</button>
           </mat-list-item>
-
-          <button mat-raised-button color="primary" routerLink="/slide">START</button>
-
+          <!-- <button mat-raised-button color="primary" routerLink="/slide">START</button> -->
         </mat-list>
       </mat-tab>
 
@@ -31,9 +29,14 @@
         </mat-form-field>
         <button mat-raised-button color="primary" (click)="onSearch()">search</button>
 
-        <mat-list-item *ngFor="let slide of hitSlides">
-          ・ <button mat-button (click)="onSlideName(slide)">{{slide}}</button>
-        </mat-list-item>
+        <mat-progress-spinner *ngIf="searchSlideLoading" mode="indeterminate" value=50>
+        </mat-progress-spinner>
+
+        <mat-list>
+          <mat-list-item *ngFor="let slide of hitSearchSlides">
+            ・<button mat-button (click)="onSlideName(slide, 'WATCH')">{{slide}}</button>
+          </mat-list-item>
+        </mat-list>
 
       </mat-tab>
     </mat-tab-group>

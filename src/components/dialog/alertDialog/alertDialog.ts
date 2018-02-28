@@ -26,7 +26,7 @@ export class AlertDialogComponent {
   }
 
   onOK = (): void => {
-    this.dialogRef.close(false);
+    this.dialogRef.close(true);
   }
 
 }

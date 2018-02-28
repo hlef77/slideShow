@@ -3,8 +3,10 @@
   <div class="margin"></div>
   <input type="file" (change)="onChangeInput($event)">
   <div class="margin"></div>
+  SlideName: <input MatInput type="text" value="" [(ngModel)]="fileName">
+  <div class="margin"></div>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancel()">cancel</button>
-  <button mat-button cdkFocusInitial (click)="onUpload()">UPLOAD</button>
+  <button mat-button cdkFocusInitial [disabled]="!file || !fileName" (click)="onUpload()">UPLOAD</button>
 </div>

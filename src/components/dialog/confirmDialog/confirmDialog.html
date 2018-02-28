@@ -1,0 +1,9 @@
+<h1 mat-dialog-title>確認</h1>
+<div mat-dialog-content>
+  {{message}}
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onYes()">Yes</button>
+  <button mat-button (click)="onNo()">No</button>
+  <button mat-button (click)="onCancel()" cdkFocusInitial>Cancel</button>
+</div>

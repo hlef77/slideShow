@@ -62,6 +62,9 @@ import {
   AlertDialogComponent
 } from '../components/dialog/alertDialog/alertDialog';
 import {
+  ConfirmDialogComponent
+} from '../components/dialog/confirmDialog/confirmDialog';
+import {
   LoadingDialogComponent
 } from '../components/dialog/loadingDialog/loadingDialog';
 import {
@@ -82,7 +85,7 @@ const appRoutes: Routes = [{
   path: 'mainMenu/:userKind',
   component: MainMenuPageComponent
 }, {
-  path: 'slide',
+  path: 'slide/:mode',
   component: SlidePageComponent
 }, {
   path: '',
@@ -97,11 +100,13 @@ const appRoutes: Routes = [{
     MainMenuPageComponent,
     SlidePageComponent,
     AlertDialogComponent,
+    ConfirmDialogComponent,
     LoadingDialogComponent,
     UploadDialogComponent
   ],
   entryComponents: [
     AlertDialogComponent,
+    ConfirmDialogComponent,
     LoadingDialogComponent,
     UploadDialogComponent
   ],

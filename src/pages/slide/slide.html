@@ -9,8 +9,8 @@
     <mat-icon aria-label="Example icon-button with a screen icon" (click)="changeFullScreen()">settings_overscan</mat-icon>
   </button>
   <button mat-icon-button>
-    <mat-icon aria-label="Example icon-button with a lock icon" *ngIf="!host" (click)="onLock()">lock_outline</mat-icon>
-    <mat-icon aria-label="Example icon-button with a unlock icon" *ngIf="host" (click)="onUnLock()">lock_open</mat-icon>
+    <mat-icon aria-label="Example icon-button with a lock icon" *ngIf="!isHost" (click)="onLock()">lock_outline</mat-icon>
+    <mat-icon aria-label="Example icon-button with a unlock icon" *ngIf="isHost" (click)="onUnLock()">lock_open</mat-icon>
   </button>
 </mat-toolbar>
 
@@ -29,6 +29,5 @@
 <div class="margin"></div>
 
 <div class="buttons">
-  <button mat-raised-button color="primary" (click)="reset()">reset</button>
   <button mat-raised-button color="primary" (click)="next()">next</button>
 </div>

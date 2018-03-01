@@ -21,13 +21,10 @@
     <div id="title">{{currentTitle}}</div>
   </mat-card-title>
 
-  <mat-card-content id="slide-contents">
+  <mat-card-content id="slide-contents" *ngFor="let content of slideInfoArray; let i = index">
+    <div [id]="'slide-page-content-' + i" class="contents-text" [@animation]="active">{{content}}</div>
   </mat-card-content>
 
 </mat-card>
 
 <div class="margin"></div>
-
-<div class="buttons">
-  <button mat-raised-button color="primary" (click)="next()">next</button>
-</div>

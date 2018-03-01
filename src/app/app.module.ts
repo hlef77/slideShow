@@ -19,13 +19,15 @@ import {
   MatButtonModule,
   MatCardModule,
   MatDialogModule,
+  MatDividerModule,
   MatInputModule,
   MatListModule,
   MatSnackBarModule,
   MatTabsModule,
   MatToolbarModule,
   MatIconModule,
-  MatProgressSpinnerModule
+  MatProgressSpinnerModule,
+  MatRadioModule
 } from '@angular/material';
 import {
   BrowserAnimationsModule
@@ -62,8 +64,14 @@ import {
   AlertDialogComponent
 } from '../components/dialog/alertDialog/alertDialog';
 import {
+  ChoiceDialogComponent
+} from '../components/dialog/choiceDialog/choiceDialog';
+import {
   ConfirmDialogComponent
 } from '../components/dialog/confirmDialog/confirmDialog';
+import {
+  GraphDialogComponent
+} from '../components/dialog/graphDialog/graphDialog';
 import {
   LoadingDialogComponent
 } from '../components/dialog/loadingDialog/loadingDialog';
@@ -100,13 +108,17 @@ const appRoutes: Routes = [{
     MainMenuPageComponent,
     SlidePageComponent,
     AlertDialogComponent,
+    ChoiceDialogComponent,
     ConfirmDialogComponent,
+    GraphDialogComponent,
     LoadingDialogComponent,
     UploadDialogComponent
   ],
   entryComponents: [
     AlertDialogComponent,
+    ChoiceDialogComponent,
     ConfirmDialogComponent,
+    GraphDialogComponent,
     LoadingDialogComponent,
     UploadDialogComponent
   ],
@@ -120,6 +132,7 @@ const appRoutes: Routes = [{
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
+    MatDividerModule,
     MatInputModule,
     MatListModule,
     MatSnackBarModule,
@@ -127,6 +140,7 @@ const appRoutes: Routes = [{
     MatToolbarModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatRadioModule,
     RouterModule.forRoot(
       appRoutes, {
         enableTracing: true

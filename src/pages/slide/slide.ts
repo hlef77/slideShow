@@ -7,6 +7,14 @@ import {
 } from 'angularfire2/database';
 
 import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition
+} from '@angular/animations';
+
+import {
   Router,
   ActivatedRoute,
   ParamMap
@@ -31,6 +39,9 @@ import {
 import {
   ConfirmDialogComponent
 } from '../../components/dialog/confirmDialog/confirmDialog';
+import {
+  GraphDialogComponent
+} from '../../components/dialog/graphDialog/graphDialog';
 
 import {
   DownloadSlide,
@@ -40,6 +51,9 @@ import {
 import {
   UserInfo
 } from '../../models/userInfo/userInfo';
+import {
+  ChoiceDialogComponent
+} from '../../components/dialog/choiceDialog/choiceDialog';
 
 interface Position {
   page: number;
@@ -49,7 +63,17 @@ interface Position {
 @Component({
   selector: 'app-slide-page',
   templateUrl: './slide.html',
-  styleUrls: ['./slide.css']
+  styleUrls: ['./slide.css'],
+  animations: [
+    trigger('animation', [
+      state('active', style({
+        opacity: 1
+      })),
+      transition('void => *', [style({
+        opacity: 0
+      }), animate(300)]),
+    ])
+  ]
 })
 export class SlidePageComponent implements OnInit {
 
@@ -59,6 +83,8 @@ export class SlidePageComponent implements OnInit {
   slideTitle: string;
   // スライド情報の中身
   slideContents: SLIDECONTENTS;
+
+  slideInfoArray: Array < string > = [];
 
   // 現在のスライドページのタイトル
   currentTitle: string;
@@ -100,33 +126,39 @@ export class SlidePageComponent implements OnInit {
     this.slideTitle = this.slideData.slideData.slide_title;
     this.slideContents = this.slideData.slideData.slide_contents;
 
+    console.log(JSON.stringify(this.slideContents, null, 2));
+
     // スライド位置の参照の取得
     this.positionRef = this.db.database.ref(`/${this.userInfo.currentSlide.author}/slides/${this.userInfo.currentSlide.name}/position`);
 
     // 一度初期状態を確認
-    this.positionRef.once('value', (snapshot) => {
-      const position: Position = snapshot.val();
-      if (position.page !== 0 || position.point !== 0) {
-        const alertRef = this.dialog.open(ConfirmDialogComponent, {
-          data: {
-            message: 'このスライドの発表位置情報が初期状態ではありません。初期化しますか？'
-          }
-        });
-        alertRef.afterClosed().subscribe((result) => {
-          console.log(result);
-          if (result === 'YES') {
-            // DBのポジション初期化
-            this.positionRef.child('page').set(0);
-            this.positionRef.child('point').set(0);
-          } else if (result === 'NO') {
-            // 処理継続
-          } else {
-            // キャンセル時
-            this.backToMainMenu();
-          }
-        });
-      }
-    });
+    if (this.isHost) {
+      this.positionRef.once('value', (snapshot) => {
+        const position: Position = snapshot.val();
+        if (position.page !== 0 || position.point !== 0) {
+          const alertRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+              message: 'このスライドの発表位置情報が初期状態ではありません。初期化しますか？'
+            }
+          });
+          alertRef.afterClosed().subscribe((result) => {
+            console.log(result);
+            if (result === 'YES') {
+              // DBのポジション初期化
+              this.positionRef.child('page').set(0);
+              this.positionRef.child('point').set(0);
+              this.slideInfoArray = [];
+            } else if (result === 'NO') {
+              // 処理継続
+            } else {
+              // キャンセル時
+              this.backToMainMenu();
+            }
+          });
+        }
+      });
+    }
+
 
     this.positionRef.on('value', (snapshot) => {
       const position = snapshot.val();
@@ -163,27 +195,18 @@ export class SlidePageComponent implements OnInit {
 
   backToMainMenu = () => {
     // メインメニュー画面に戻る
-    this.router.navigate(['mainMenu', '']);
+    let userKind;
+    if (this.isHost) {
+      userKind = 'HOST';
+    } else {
+      userKind = 'GUEST';
+    }
+    this.router.navigate(['mainMenu', userKind]);
   }
 
   loadSlidePage = (page: number) => {
     // 該当ページのタイトルのセット
     this.currentTitle = this.slideContents[page].title;
-    // 要素を非表示で画面にセット
-    this.setSlideContent(page);
-  }
-
-  // 非表示状態で画面に要素をセットする
-  setSlideContent = (page: number) => {
-    let contentsHtml = '';
-    this.slideContents[page].contents.forEach((item, index) => {
-      // スライドデータの要素ごとに非表示でリストにHTML要素として追加
-      if (Object.keys(item)[0] = 'text') {
-        contentsHtml += '<div id="slide-page-content-' + (index + 1) + '" style=display:none>' + item.text + '</div>';
-      }
-    });
-    // 画面のコンテンツ部分に挿入」
-    document.getElementById('slide-contents').innerHTML = contentsHtml;
   }
 
   next = () => {
@@ -193,11 +216,10 @@ export class SlidePageComponent implements OnInit {
     }
 
     // this.currentPosition.point += 1;
-    let currentPoint;
     this.positionRef.child('/point').once('value', (snapshot) => {
-      currentPoint = snapshot.val();
+      const currentPoint = snapshot.val();
+      this.positionRef.child('/point').set(currentPoint + 1);
     });
-    this.positionRef.child('/point').set(currentPoint + 1);
   }
 
   onChangePage = () => {
@@ -206,7 +228,53 @@ export class SlidePageComponent implements OnInit {
 
   onChangePoint = (point) => {
     if (point !== 0 && point <= this.slideContents[0].contents.length) {
-      document.getElementById('slide-page-content-' + point).style.display = '';
+      const pointContent = this.slideContents[0].contents[point - 1];
+      const kind = Object.keys(pointContent)[0];
+      if (kind === 'text') {
+        this.slideInfoArray.push(pointContent.text);
+      } else if (kind === 'choice') {
+        // 質問内容を取得
+        const data = pointContent.choice;
+
+        // db初期値設定
+        const firstSet = {
+          [data.id]: {}
+        };
+        const itemsObj = firstSet[data.id];
+        data.items.forEach(item => {
+          itemsObj[item] = 0;
+        });
+        const rdRef = this.db.database.ref(`/${this.userInfo.currentSlide.author}/slides/${this.userInfo.currentSlide.name}/receive_data`);
+        rdRef.set(firstSet);
+
+        const choiceRef = this.dialog.open(ChoiceDialogComponent, {
+          data: {
+            title: '質問',
+            message: data.message,
+            items: data.items,
+          }
+        });
+        choiceRef.afterClosed().subscribe((result) => {
+          // db送信
+          if (result) {
+            rdRef.child(`${data.id}/${result}`).once('value', (snapshot) => {
+              rdRef.child(`${data.id}/${result}`).set(snapshot.val() + 1);
+            });
+          }
+        });
+      } else if (kind === 'graph') {
+        const data = pointContent.graph;
+        const ref = `/${this.userInfo.currentSlide.author}/slides/${this.userInfo.currentSlide.name}/receive_data/${data.dataId}`;
+        const rdRef = this.db.database.ref(ref);
+        const graphData = rdRef.once('value', (snapshot) => {
+          const graphRef = this.dialog.open(GraphDialogComponent, {
+            data: {
+              name: data.name,
+              graphData: snapshot.val()
+            }
+          });
+        });
+      }
     }
   }
 

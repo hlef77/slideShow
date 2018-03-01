@@ -1,4 +1,12 @@
 #mainmenu-card {
     overflow: scroll;
+}
 
+#mainmenu-title {
+    font-size: 5vw;
+    color: #FFFFFF
+}
+
+.slide-list-item:hover {
+    background-color: #AAAAAA
 }

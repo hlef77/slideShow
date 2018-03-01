@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content>
+  {{message}}<br>
+  <mat-radio-group class="radio-group" [(ngModel)]="choiceItem">
+    <mat-radio-button class="radio-button" *ngFor="let item of items" [value]="item">
+      {{item}}
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
+<div mat-dialog-actions>
+  <button mat-button [disabled]="!choiceItem" (click)="onOK()">OK</button>
+</div>

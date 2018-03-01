@@ -77,7 +77,7 @@ export class MainMenuPageComponent implements OnInit {
     public downloadSlide: DownloadSlide,
     public userInfo: UserInfo
   ) {
-    this.searchBoxText = 'example_user';
+    this.searchBoxText = '';
   }
 
   ngOnInit() {
@@ -163,10 +163,10 @@ export class MainMenuPageComponent implements OnInit {
 
     const rootRef = this.db.database.ref(`/`);
     rootRef.once('value', (rootSnapshot) => {
-      // 検索対象が存在するか確認
+      console.log('search to ' + `${this.searchingUserId}`);
       if (rootSnapshot.hasChild(`${this.searchingUserId}`)) {
         // 存在する場合
-        const searchUserSlideRef = this.db.database.ref(`/${this.searchingUserId}/slides`);
+        const searchUserSlideRef = this.db.database.ref(`/${this.searchingUserId}/slides/`);
         searchUserSlideRef.once('value', (slidesSnapshot) => {
           this.hitSearchSlides = Object.keys(slidesSnapshot.val());
           // ぐるぐるの非表示

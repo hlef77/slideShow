@@ -1,5 +1,5 @@
 #main-header {
-  height: 10vh;
+  height: 10vmin;
   max-height: 12vmin;
 }
 
@@ -13,13 +13,9 @@
   flex: 1 1 auto;
 }
 
-.window {
-  position: relative;
-}
-
 .slide-card {
-  width: 72vw;
-  height: 40.5vw;
+  width: 64vw;
+  height: 36vw;
   margin: auto;
 }
 
